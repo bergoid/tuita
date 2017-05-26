@@ -1,0 +1,176 @@
+. context : its own folder with cXX/load.js
+    . the version module decompresses the string, then loads the context with the decompressed text as an argument.
+
+    v in context 00, display the decompressed string in the console
+
+    v sample "crel" to refactor ra.crel():
+        v allow nested arrays
+        v single child elem: needs to be wrapped in array?
+            --> no, parent array is sufficient
+            v crel() without properties argument and a single-child arg:
+                make it be able to distinguish from crel()
+                WITH properties arg and no children
+            --> ra.crel() could do all of this already,
+                the sample serves as a demo now
+
+    v sample "style" to test inline CSS
+
+    v sample "children" to test:
+        v ra.appendChild()
+        v ra.appendChildren()
+            v allow this:
+                ra.crel([type, props, children])
+              and this:
+                ra.appendChild(parent, [type, props, children])
+
+              does this not make both ra.crel() and ra.appendChild() much more simple?
+            v merge both append*() methods into append()
+
+        x ra.prependChild()
+        x ra.prependChildren()
+
+    . test in c00, with large argument:
+        . make ts.show() add a <style> tag to <body> containing the css
+        . create tuitaprogress.js with pbarDOM() method, adding its own style too.
+        . the .css file can be removed
+            . together with the complicated async onLoad handling
+
+    . c01: diagnostic tool:
+        . 2 textarea panes side-by-side
+            . L : plaintext
+            . R : compressed
+        . above panes: 2 buttons side-by-side:
+            . L : decompress
+            . R : compress
+
+        . somewhere :  room for a progress bar and a message (either "decompressing ..." or "compressing ...")
+
+        . bottom : message showing:
+            . size of plaintext in bytes + -h
+            . size of compressed text in bytes + -h
+            . compression factor
+
+        . when called with ?d=0001 : both panes are empty
+        . when called with ?d=0001STRING : STRING in R pane, text decompressed from STRING in L pane.
+
+        . split off tuitaprogress from tuitasplash
+        . use fsm, splitbox
+
+    . put on GH
+
+
+
+. handle URLs with missing ?d= argument
+    . OK for same URL with other arg(s)
+    ; for other sub-URLs: requires a 404 page
+
+v merge app into main.js ?
+    v remove dependency on radi
+x load.go() --> version.load()
+x context.go() --> context.load()
+
+v Web Workers / requirejs
+    v read about WW
+    v create sample app with WW: ww1
+        v calc primes
+        v notify main thread
+        v try to start ww second time
+            --> the second message is handled only after the handler of the first one has finished.
+    v second sample ww2:
+        v use requirejs
+        x make web worker into a requirejs module too
+            --> just use a self-exec function
+
+    v sample lz1
+        v use lzma without WW
+        v on_progress / on_finish : single threaded callbacks?
+
+    v lz2:
+        v add a us64 module
+        v create a module (lz64) that does both lzma and us64
+        v the methods of this module accept optional on_progress and on_finish handlers too.
+        x on_progress adjusts the percentage to account for us64 en-/decoding.
+            v measure time relative to (de)compression : negligeable?
+                --> us64 encoding time is negligeable wrt lzma
+
+    v third sample ww3:
+        v us64/lzma/lz64 setup from lz2 sample
+        v Web Worker
+        v Conditional dependency on WW-plumbing
+
+    v ww4:
+        v group ww-side and client-side code in one module
+        v split into app-specific and app-independent module
+
+    v  where to do us64 en/decoding?
+        --> inside web worker: both input and output become regular strings
+
+    v sample pbar : progress bar
+        v webpage with a div both hor. and vert. centeredv
+        v inside this div: a column of 2 divs
+            v first one some text
+                v hor. centered
+            v second one the progress bar
+                v black-on-white
+                v border 2px
+                v max length 10 cm
+                v full window width, apart from some margin, otherwise
+            v timer fun to simulate progress
+            v use flexbox
+
+    v use tuita splash screen (sample pbar) to show progress
+        v create a module "tuitasplash.js" that:
+            v provides a function show() that:
+                v loads tuitasplash.css and when loaded:
+                    x deletes all children from body
+                        --> page is already empty
+                    v adds the splash screen
+                    v provides a function progress() that updates the progress bar
+            v provides a function hide() that:
+                v deletes all children from body
+                v unloads tuitasplash.css
+
+tuita
+-----
+
+    The URL is the app
+
+    http://example.com?d=STRING_B64
+
+    tuita takes the 1st 2 characters (VERSION) of STRING_B64, then it loads vVERSION/load.js and executes its single JS function "go()" with STRING_B64 as an argument, which will - typically - in its turn take the next 2 characters (CONTEXT) of STRING_B64, LZMA-decompress the rest of STRING_B64, load vVERSION/cCONTEXT/load.js and execute its function "go()" with the decompressed text as an argument.
+
+    every vVERSION/ directory will contain the empty context 'c00.js' to allow for tuita apps built completely from scratch. The decompressed text is in this case a self-executing function that builds the entire web app out of HTML, CSS and JS.
+
+    Non-empty contexts build part oft heir web app from scripts found in their cCONTEXT directory. The decompressed text can be for example source code (used in an in-browser IDE loaded from context) or MarkDown code (transformed by a client-side MD interpreter into HTML).
+
+    Related project (for MD text): http://hashify.me
+
+    https://news.ycombinator.com/item?id=2464213
+
+
+    Documentation:
+
+    https://developer.mozilla.org/en-US/docs/Web/API/DOMImplementation/createHTMLDocument
+
+    http://stackoverflow.com/questions/27993075/createhtmldocument-does-not-initialize
+
+    A bookmarklet could store an entire "normal" page in JS.
+        Obtain stylesheets, head tag & iterate over its children, document.innerHTML, ... ?
+        Don't attempt to integrate external .js files.
+
+        https://developer.mozilla.org/en-US/docs/Web/API/StyleSheetList
+        http://stackoverflow.com/questions/6088972/get-doctype-of-an-html-as-string-with-javascript
+
+        e.g. create a sample on pen.io, show iframe of demo in new tab, start bookmarklet
+
+        https://github.com/remy/inliner
+            "Node utility to inline images, CSS and JavaScript for a web page - useful for mobile sites"
+
+
+
+    zeme becomes a context of tuita
+
+    http://192.168.236.10/tuita/?d=0000XQAAAAIMAAAAAAAAAAAkGUmYbxAZBgpsp0zbvmLu..6ZeAA_
+
+
+http://192.168.236.10/tuita/?d=0000XQAAAAI.S0wAAAAAAAA8lgck75FsT6lUfkW.bNQyCShkTfwo5.xUuXyPV3VjXa0XMGtRMZs-OqAeKVolf3ZF2W3tSrJjegIjgLwfSZaErzI4g5.8d1LnfRE7t82TWogGsno2SUptZl51xnBLSKpKRGb9v6enO.hhQqJbCLn5hB1jeeTzzvXgykXRYR03qIYNfTRiANpqxbkNnBifphk28kMKkfrzoiunXljvr90gZ1CbFwuwsyBoopLpnYuoSW8WrxSAYx3io0BvswdTT.b4j3z6cq5-D7DXSVBFOGmJ-cCOEtFrjoB2LikRcGz1pUFVDNQHV-8YgIf.UB0G-eijOQfAdkX-m4ZKudH4rozTBtT0hcxfA5ZIg6EjgBG1VjUD3TnW93jSVEXRmLV.4yW7I.0PSNWA.Ayj0ALacFBleLxXg3kYDjJQ1zfrNyPotz8KA9gHSBaK7qOUYojGcoPdE8u7ZP7UryUUamgadW-ts7vp.nkPqKVyst8YblNTnZEQ5Haewn4FhpklYBQ28KQHGpEEGsTRw6lC49j5IeybuVh8prp9BIr-fDQcZ6sySZ0tzzM47fmBgsSI2HuHoOFK2dePxj7psHxJI-.Vn2dLSArr1CkPLBM2fMJKyQKaqWCy3fXCuGTS8fNZbSKvvkw64TvAH8i8xc28I2FuPH8rggbXvnuWcHbaKAvISUbmktNThmaqoh7nfOyk4if3MHGo4CyA6SN9ntXmjod-uKUBA6o1k7RUDFfHAC0cmSnB89RBPAaSDLkdFEPseDGTLML5MLIiRW7r3yWuAIV8Os3JlQXM3fvXAZifKKZhTcbylQnkrUXc9uss0YH7fk.HEbPfQ03UWUc-pj32opV1z-FqWc-l608mP7Etq6gUbOlNvX9K1lyVjZO09ESqguWRYsCQYTw7Gf7wo8hN8wrvRmpvL8kPOvqWGz5aPXK1uaGRSekmqqiIdO-B.xQvDzvD7WGLvestf0ZyauIHGonWrUK3E2NrK.VTjLly7TcNppc8H-bxeLjhe.vIjRaq3zsXOtnrcWBjQfOv0qvfauoT-DVdsiRu.ocWQahuVgClmrP4-56NOECD1CqYfTRnSchLEcyTKb63rtcmCOpoQ8PfsEhXAanGKzWi-eVt5qVRKggYIlAhBAGNvsm-O0E0vnXdH4GAIP3kUqbGt8XON605Vz2MUsgAbTOIbtYAtVEhHDr8IvJZZv9dvhMF2-ih07zRDQzlOYpRTAGaqF4knmnR4Mbdnf3WJXhZ-AvN.5UoRg-p.Hze-5owLlbAj4Xzg4HAZcQlU.j1kTYxBaWw7m.BcE1HDNGREaqtYB26zrEnGFxZhulmUli-6XasWeTlWwUI-cfarfz7Uit0zR5bIEL53VM9-ClkCTuAyyps37U78MS9Ll-qDz5LZkKQEw7.EJP4cXhZ-AvN.5UoRg-p.Hze-5owLlbAj4Xzg4HAZcQlU.j1kTYxBaWw7m.BcE1HDNGREaqtYB26zrEnGFxZhulmUli-6XasWeTlWwUI-cfarfz7Uit0zR5bIEL53VM9-ClkCTuAyyps37U78MS9Ll-qDz5LZkKQEw7.EJP4cXhZ-AvN.5UoRg-p.Hze-5owLlbAj4Xzg4HAZcQlU.j1kTYxBaWw7m.BcE1HDNGREaqtYB26zrEnGFxZhulmUli-6XasWeTlWwUI-cfarfz7Uit0zR5bIEL53VM9-ClkCTuAyyps37U78MS9Ll-qDz5LZkKQEw7.EJP4cXhZ-AvN.5UoRg-p.Hze-5owLlbAj4Xzg4HAZcQlU.j1kTYxBaWw7m.BcE1HDNGREaqtYB26zrEnGFxZhulmUli-6XasWeTlWwUI-cfarfz7Uit0zR5bIEL53VM9-ClkCTuAyyps37U78MS9Ll-qDz5LZkKQEw7.EJP4cXhZ-AvN.5UoRg-p.Hze-5owLlbAj4Xzg4HAZcQlU.j1kTYxBaWw7m.BcE1HDNGREaqtYB26zrEnGFxZhulmUli-6XasWeTlWwUI-cfarfz7Uit0zR5bIEL53VM9-ClkCTuAyyps37U78MS9Ll-qDz5LZkKQEw7.EJP4cXhZ-AvN.5UoRg-p.Hze-5owLlbAj4Xzg4HAZcQlU.j1kTYxBaWw7m.BcE1HDNGREaqtYBroA3OBe...ovcZgA__

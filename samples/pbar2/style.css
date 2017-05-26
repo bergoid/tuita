@@ -1,0 +1,57 @@
+body
+{
+    font-family: sans-serif;
+}
+
+.outerTable
+{
+    display: table;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+}
+
+.outerCell
+{
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.innerTable
+{
+    display: table;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+.pbarRow
+{
+    display: table-row;
+}
+
+.pbarCell
+{
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.pbarTextCell
+{
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 2cm;
+}
+
+.pbar
+{
+    border: 2px solid black;
+    margin-left: 5%;
+    margin-right: 5%;
+    margin: auto;
+    max-width: 12cm;
+    height: .2cm;
+}
