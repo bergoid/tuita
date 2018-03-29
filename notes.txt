@@ -1,6 +1,80 @@
-. context : its own folder with cXX/load.js
-    . the version module decompresses the string, then loads the context with the decompressed text as an argument.
 
+    http://192.168.236.20/tuita/?d=0000XQAAAAIMAAAAAAAAAAAkGUmYbxAZBgpsp0zbvmLu..6ZeAA_
+
+. when "Missing data string": show something useful on page.
+    . links to a number of contexts?
+
+. TODO : sbColum take up all space in non-dir too
+. sbPanel mix-in class instead of injected parent div?
+. create sample flexlayout
+    v create a module called "flexlayout"
+        v by simplifying splitbox
+        v allow panels to be defined like in ra.append() / ra.create()
+        . build UI of c01
+        . this means: center panel of toplevel column is splitbox
+
+. c01: diagnostic tool:
+    . 2 textarea panes side-by-side
+        . L : plaintext
+        . R : compressed
+    . above panes: 2 buttons side-by-side:
+        . L : "<-- decompress"
+        . R : "compress -->"
+
+    . below panes: message showing:
+        . size of plaintext in bytes + -h
+        . size of compressed text in bytes + -h
+        . compression factor
+
+    . bottom: room for a progress bar and a message (either "decompressing ..." or "compressing ...")
+
+    . layout:
+        . flexlayout column:
+            . panes (splitbox row):
+                . L (flexlayout column):
+                    . decompress button
+                    . plaintext pane
+                . R (flexlayout column):
+                    . compress button
+                    . compressed text pane
+            . bottom (flexlayout row):
+                . progress bar
+                . message
+
+    . when called with ?d=0001 : both panes are empty
+    . when called with ?d=0001STRING : STRING in R pane, text decompressed from STRING in L pane.
+
+    v split off tuitaprogress from tuitasplash
+    . use fsm, splitbox
+
+. put on GH
+
+. splitbox: make the layout system as flexible as flexlayout
+
+. wait for page load (onload) in main.js?
+
+. handle URLs with missing ?d= argument
+    . OK for same URL with other arg(s)
+    ; for other sub-URLs: requires a 404 page
+
+
+v requirejs -> config -> use 'map'
+    v pass prefix for ww.js to lz64w.js
+
+v lz64w.js : worker object really needs to be returned at the end?
+    --> yes for ww.js, not for lz64.js
+
+v context : its own folder with cXX/context.js
+    x the version module decompresses the string, then loads the context with the decompressed text as an argument.
+    --> the context.go() function decompresses the string
+
+    v create HTML page with links to tuita apps
+
+    . test in c00, with large argument:
+        v make ts.show() add a <style> tag to <body> containing the css
+        v create tuitaprogress.js with pbarDOM() method, adding its own style too.
+        v the .css file can be removed
+            v together with the complicated async onLoad handling
     v in context 00, display the decompressed string in the console
 
     v sample "crel" to refactor ra.crel():
@@ -28,41 +102,6 @@
 
         x ra.prependChild()
         x ra.prependChildren()
-
-    . test in c00, with large argument:
-        . make ts.show() add a <style> tag to <body> containing the css
-        . create tuitaprogress.js with pbarDOM() method, adding its own style too.
-        . the .css file can be removed
-            . together with the complicated async onLoad handling
-
-    . c01: diagnostic tool:
-        . 2 textarea panes side-by-side
-            . L : plaintext
-            . R : compressed
-        . above panes: 2 buttons side-by-side:
-            . L : decompress
-            . R : compress
-
-        . somewhere :  room for a progress bar and a message (either "decompressing ..." or "compressing ...")
-
-        . bottom : message showing:
-            . size of plaintext in bytes + -h
-            . size of compressed text in bytes + -h
-            . compression factor
-
-        . when called with ?d=0001 : both panes are empty
-        . when called with ?d=0001STRING : STRING in R pane, text decompressed from STRING in L pane.
-
-        . split off tuitaprogress from tuitasplash
-        . use fsm, splitbox
-
-    . put on GH
-
-
-
-. handle URLs with missing ?d= argument
-    . OK for same URL with other arg(s)
-    ; for other sub-URLs: requires a 404 page
 
 v merge app into main.js ?
     v remove dependency on radi
@@ -170,7 +209,6 @@ tuita
 
     zeme becomes a context of tuita
 
-    http://192.168.236.10/tuita/?d=0000XQAAAAIMAAAAAAAAAAAkGUmYbxAZBgpsp0zbvmLu..6ZeAA_
 
 
 http://192.168.236.10/tuita/?d=0000XQAAAAI.S0wAAAAAAAA8lgck75FsT6lUfkW.bNQyCShkTfwo5.xUuXyPV3VjXa0XMGtRMZs-OqAeKVolf3ZF2W3tSrJjegIjgLwfSZaErzI4g5.8d1LnfRE7t82TWogGsno2SUptZl51xnBLSKpKRGb9v6enO.hhQqJbCLn5hB1jeeTzzvXgykXRYR03qIYNfTRiANpqxbkNnBifphk28kMKkfrzoiunXljvr90gZ1CbFwuwsyBoopLpnYuoSW8WrxSAYx3io0BvswdTT.b4j3z6cq5-D7DXSVBFOGmJ-cCOEtFrjoB2LikRcGz1pUFVDNQHV-8YgIf.UB0G-eijOQfAdkX-m4ZKudH4rozTBtT0hcxfA5ZIg6EjgBG1VjUD3TnW93jSVEXRmLV.4yW7I.0PSNWA.Ayj0ALacFBleLxXg3kYDjJQ1zfrNyPotz8KA9gHSBaK7qOUYojGcoPdE8u7ZP7UryUUamgadW-ts7vp.nkPqKVyst8YblNTnZEQ5Haewn4FhpklYBQ28KQHGpEEGsTRw6lC49j5IeybuVh8prp9BIr-fDQcZ6sySZ0tzzM47fmBgsSI2HuHoOFK2dePxj7psHxJI-.Vn2dLSArr1CkPLBM2fMJKyQKaqWCy3fXCuGTS8fNZbSKvvkw64TvAH8i8xc28I2FuPH8rggbXvnuWcHbaKAvISUbmktNThmaqoh7nfOyk4if3MHGo4CyA6SN9ntXmjod-uKUBA6o1k7RUDFfHAC0cmSnB89RBPAaSDLkdFEPseDGTLML5MLIiRW7r3yWuAIV8Os3JlQXM3fvXAZifKKZhTcbylQnkrUXc9uss0YH7fk.HEbPfQ03UWUc-pj32opV1z-FqWc-l608mP7Etq6gUbOlNvX9K1lyVjZO09ESqguWRYsCQYTw7Gf7wo8hN8wrvRmpvL8kPOvqWGz5aPXK1uaGRSekmqqiIdO-B.xQvDzvD7WGLvestf0ZyauIHGonWrUK3E2NrK.VTjLly7TcNppc8H-bxeLjhe.vIjRaq3zsXOtnrcWBjQfOv0qvfauoT-DVdsiRu.ocWQahuVgClmrP4-56NOECD1CqYfTRnSchLEcyTKb63rtcmCOpoQ8PfsEhXAanGKzWi-eVt5qVRKggYIlAhBAGNvsm-O0E0vnXdH4GAIP3kUqbGt8XON605Vz2MUsgAbTOIbtYAtVEhHDr8IvJZZv9dvhMF2-ih07zRDQzlOYpRTAGaqF4knmnR4Mbdnf3WJXhZ-AvN.5UoRg-p.Hze-5owLlbAj4Xzg4HAZcQlU.j1kTYxBaWw7m.BcE1HDNGREaqtYB26zrEnGFxZhulmUli-6XasWeTlWwUI-cfarfz7Uit0zR5bIEL53VM9-ClkCTuAyyps37U78MS9Ll-qDz5LZkKQEw7.EJP4cXhZ-AvN.5UoRg-p.Hze-5owLlbAj4Xzg4HAZcQlU.j1kTYxBaWw7m.BcE1HDNGREaqtYB26zrEnGFxZhulmUli-6XasWeTlWwUI-cfarfz7Uit0zR5bIEL53VM9-ClkCTuAyyps37U78MS9Ll-qDz5LZkKQEw7.EJP4cXhZ-AvN.5UoRg-p.Hze-5owLlbAj4Xzg4HAZcQlU.j1kTYxBaWw7m.BcE1HDNGREaqtYB26zrEnGFxZhulmUli-6XasWeTlWwUI-cfarfz7Uit0zR5bIEL53VM9-ClkCTuAyyps37U78MS9Ll-qDz5LZkKQEw7.EJP4cXhZ-AvN.5UoRg-p.Hze-5owLlbAj4Xzg4HAZcQlU.j1kTYxBaWw7m.BcE1HDNGREaqtYB26zrEnGFxZhulmUli-6XasWeTlWwUI-cfarfz7Uit0zR5bIEL53VM9-ClkCTuAyyps37U78MS9Ll-qDz5LZkKQEw7.EJP4cXhZ-AvN.5UoRg-p.Hze-5owLlbAj4Xzg4HAZcQlU.j1kTYxBaWw7m.BcE1HDNGREaqtYB26zrEnGFxZhulmUli-6XasWeTlWwUI-cfarfz7Uit0zR5bIEL53VM9-ClkCTuAyyps37U78MS9Ll-qDz5LZkKQEw7.EJP4cXhZ-AvN.5UoRg-p.Hze-5owLlbAj4Xzg4HAZcQlU.j1kTYxBaWw7m.BcE1HDNGREaqtYBroA3OBe...ovcZgA__
