@@ -1,5 +1,5 @@
 (function (root, undefined) {
-define(['radi'], function (ra) {
+define(['vn/radi'], function (ra) {
 
 'use strict';
 var sb = {};
@@ -166,6 +166,57 @@ var createSplitter = function(dir, prevPanel)
         setNextPanel : setNextPanel
     };
 
+};
+
+//
+sb.css = function()
+{
+    return ra.create
+    (
+        "style",
+        {
+            type: "text/css",
+            innerHTML: "\
+            .sbRow\
+            {\
+                display: flex;\
+                flex-flow: row nowrap;\
+            }\
+            .sbColumn\
+            {\
+                display: flex;\
+                flex-flow: column nowrap;\
+                flex-grow: 1;\
+            }\
+            .sbPanel\
+            {\
+                display: flex;\
+                flex-flow: column nowrap;\
+                flex-grow: 1;\
+            }\
+            .sbHorSplitter\
+            {\
+                flex-grow: 0;\
+                background-color: #C0C0C0;\
+                min-height: 8px;\
+                min-width: 100%;\
+                cursor: row-resize;\
+            }\
+            .sbHorSplitter:hover\
+            {\
+                background-color: #E0E0E0;\
+            }\
+            .sbVerSplitter\
+            {\
+                flex-grow: 0;\
+                background-color: #C0C0C0;\
+                min-width: 8px;\
+                min-height: 100%;\
+                cursor: col-resize;\
+            }\
+            "
+        }
+    );
 };
 
 //

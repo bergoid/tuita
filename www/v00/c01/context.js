@@ -4,44 +4,125 @@ define(["vn/radi", "ct/fsm", "ct/flexlayout", "ct/splitbox", "vn/tuitasplash", "
 'use strict';
 var context = {};
 
-var containerDOM  = function()
+//
+var bodyCss = function()
 {
     return ra.create
     (
-        "div",
+        "style",
         {
-            id: "idContainer",
-            className: "container"
+            type: "text/css",
+            innerHTML: "\
+            body\
+            {\
+                display: flex;\
+                flex-flow: column nowrap;\
+                height: 100vh;\
+                max-height: 100vh;\
+                margin: 0;\
+                padding: 1em;\
+                overflow: hidden;\
+            }\
+            .plainTextArea\
+            {\
+                flex-grow: 1;\
+            }\
+            .compressedTextArea\
+            {\
+                flex-grow: 1;\
+            }\
+            .bottomElement\
+            {\
+                flex-grow: 1;\
+                border: 1px solid #8080ff;\
+            }\
+            "
         }
     );
 };
 
-var panesDOM() = function()
+//
+var LPaneDOM = function()
 {
-    var panesLayout = {
-        row:
+    var lPaneLayout = {
+        column:
         [
             [
                 "div",
                 {
+                    innerHTML: "<-- decompress"
+                }
+            ],
+            [
+                "div",
+                {
+                    className: "compressedTextArea",
                     innerHTML: "L pane"
                 }
             ],
             [
                 "div",
                 {
-                    innerHTML: "R pane"
+                    innerHTML: "Size of plaintext"
                 }
             ]
 
         ]
     };
 
-    var panes = ra.create("div");
-    return sb.build(panes, layout);
+    var lPane = ra.create("div");
+    return fl.build(lPane, lPaneLayout);
 };
 
-var buildUI = function()
+//
+var RPaneDOM = function()
+{
+    var rPaneLayout = {
+        column:
+        [
+            [
+                "div",
+                {
+                    innerHTML: "compress -->"
+                }
+            ],
+            [
+                "div",
+                {
+                    className: "plainTextArea",
+                    innerHTML: "R pane"
+                }
+            ],
+            [
+                "div",
+                {
+                    innerHTML: "Size of compressed text"
+                }
+            ]
+
+        ]
+    };
+
+    var rPane = ra.create("div");
+    return fl.build(rPane, rPaneLayout);
+};
+
+//
+var panesDOM = function()
+{
+    var panesLayout = {
+        row:
+        [
+            RPaneDOM(),
+            LPaneDOM()
+        ]
+    };
+
+    var panes = ra.create("div");
+    return sb.build(panes, panesLayout);
+};
+
+var buildUI = function(decompressedResult)
 {
     //
     var layout =
@@ -55,12 +136,14 @@ var buildUI = function()
                     [
                         "div",
                         {
+                            className: "bottomElement",
                             innerHTML: "progress bar"
                         }
                     ],
                     [
                         "div",
                         {
+                            className: "bottomElement",
                             innerHTML: "message"
                         }
                     ]
@@ -69,78 +152,71 @@ var buildUI = function()
         ]
     };
 
-    var container = ra.create
-    (
-        "div",
-        {
-            id: "idContainer",
-            className: "container"
-        }
-
-    );
-
     ra.append
     (
         ra.body(),
         [
             fl.css(),
-            [
-                "style",
-                {
-                    type: "text/css",
-                    innerHTML: ""
-                }
-            ],
-            container
+            sb.css(),
+            bodyCss(),
         ]
     );
 
-    fl.build(container, layout);
+    fl.build(ra.body(), layout);
 
 };
 
 //
 context.go = function(dataString)
 {
-    ra.log("input: " + dataString.substring(4));
+    var compressedData = dataString.substring(4);
+    var decompressedResult = "";
 
-    ts.show();
+    if (compressedData.length > 0)
+    {
+        ra.log("input: " + compressedData);
 
-    lz64.decompress
-    (
-        dataString.substring(4),
-        function(res, err)
-        {
-            if (!!res)
+        ts.show();
+
+        lz64.decompress
+        (
+            compressedData,
+            function(res, err)
             {
-                ts.hide();
+                if (!!res)
+                {
+                    ts.hide();
 
-                buildUI();
+                    decompressedResult = res;
 
-                ra.log("Decompressed result: " + res);
+                    ra.log("Decompressed result: " + decompressedResult);
 
-//                ra.body().appendChild
-//                (
-//                    ra.create
-//                    (
-//                        "textarea",
-//                        {
-//                            value: res
-//                        }
-//                    )
-//                );
+    //                ra.body().appendChild
+    //                (
+    //                    ra.create
+    //                    (
+    //                        "textarea",
+    //                        {
+    //                            value: res
+    //                        }
+    //                    )
+    //                );
+                }
+
+                if (!!err)
+                    ra.log("Error: " + err);
+            },
+            function(progessFraction)
+            {
+                var percent = progessFraction * 100;
+                ts.progress(percent);
+                //                    ra.log("progress: " + percent + "%");
             }
+        );
+    }
 
-            if (!!err)
-                ra.log("Error: " + err);
-        },
-        function(progessFraction)
-        {
-            var percent = progessFraction * 100;
-            ts.progress(percent);
-            //                    ra.log("progress: " + percent + "%");
-        }
-    );
+    buildUI(decompressedResult);
+
 };
 
 //

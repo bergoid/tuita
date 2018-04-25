@@ -7,6 +7,35 @@ var app = {};
 var container = undefined;
 
 //
+var bodyCss = function()
+{
+    return ra.create
+    (
+        "style",
+        {
+            type: "text/css",
+            innerHTML: "\
+                body\
+                {\
+                    display: flex;\
+                    flex-flow: column nowrap;\
+                    height: 100vh;\
+                    max-height: 100vh;\
+                    margin: 0;\
+                    padding: 1em;\
+                    overflow: hidden;\
+                }\
+                .leaf\
+                {\
+                    flex-grow: 1;\
+                    border: 1px solid #8080ff;\
+                }\
+                "
+        }
+    );
+};
+
+//
 var containerDOM = function()
 {
     return ra.create
@@ -27,18 +56,21 @@ var layout =
         [
             "div",
             {
+                className: "leaf",
                 innerHTML: "A"
             }
         ],
         [
             "div",
             {
+                className: "leaf",
                 innerHTML: "B"
             }
         ],
         [
             "div",
             {
+                className: "leaf",
                 innerHTML: "C"
             }
         ],
@@ -48,18 +80,21 @@ var layout =
                 [
                     "div",
                     {
+                        className: "leaf",
                         innerHTML: "D1"
                     }
                 ],
                 [
                     "div",
                     {
+                        className: "leaf",
                         innerHTML: "D2"
                     }
                 ],
                 [
                     "div",
                     {
+                        className: "leaf",
                         innerHTML: "D3"
                     }
                 ],
@@ -71,16 +106,17 @@ var layout =
 //
 app.go = function(state)
 {
-    var container = containerDOM();
     ra.append
     (
         ra.body(),
         [
-            fl.css(),
-            container,
+            bodyCss(),
+            fl.css()
         ]
     );
-    fl.build(container, layout);
+
+//    fl.build(container, layout);
+    fl.build(ra.body(), layout);
 };
 
 //

@@ -1,11 +1,12 @@
 
-    http://192.168.236.20/tuita/?d=0000XQAAAAIMAAAAAAAAAAAkGUmYbxAZBgpsp0zbvmLu..6ZeAA_
-
-
 . when "Missing data string": show something useful on page.
-    . links to a number of contexts?
+    . load a specific version/context
+        . this context shows a markdown page with info about tuita
+        . vOO/c00 ?
+        . datastring is error msg
+            . if not empty: show rectangle with message on top of page
 
-. TODO : sbColum take up all space in non-dir too
+. TODO : sbColum: take up all space in non-dir too
 . sbPanel mix-in class instead of injected parent div?
 . create sample flexlayout
     v create a module called "flexlayout"
@@ -13,6 +14,11 @@
         v allow panels to be defined like in ra.append() / ra.create()
         . build UI of c01
         . this means: center panel of toplevel column is splitbox
+
+. versioning:
+    . v00 : current WIP. Will become version #N>0 when finished
+
+. c00: null context: all code must be extracted from 'd' URL parameter
 
 . c01: diagnostic tool:
     . 2 textarea panes side-by-side
@@ -35,9 +41,11 @@
                 . L (flexlayout column):
                     . decompress button
                     . plaintext pane
+                    . plaintext size
                 . R (flexlayout column):
                     . compress button
                     . compressed text pane
+                    . compressed text size
             . bottom (flexlayout row):
                 . progress bar
                 . message

@@ -17,38 +17,42 @@ context.go = function(dataString)
         function(lz64)
         {
             ts.show();
-//            lz64.decompress
-//            (
-////                        compressed,
-//                dataString.substring(4),
-//                function(res, err)
-//                {
-//                    if (!!res)
-//                    {
+            lz64.decompress
+            (
+//                        compressed,
+                dataString.substring(4),
+                function(res, err)
+                {
+                    // !!res : the decompression ended successfully
+                    if (!!res)
+                    {
 //                        ts.onProgress(100);
-//                        // TODO : eval decompressed text
-//                        console.log("Decompressed result: " + res);
-//                        ra.append
-//                        (
-//                            ra.body(),
-//                            "textarea",
-//                            {
-//                                value: res
-//                            }
-//                        );
-//                    }
-//
-//                    if (!!err)
-//                        console.log("Error: " + err);
-//
-//                    ts.hide();
-//                },
-//                function(percent)
-//                {
+                        ts.progress(100);
+                        // TODO : eval decompressed text
+                        console.log("Decompressed result: " + res);
+                        ra.append
+                        (
+                            ra.body(),
+                            "textarea",
+                            {
+                                value: res
+                            }
+                        );
+                    }
+
+                    // !!err : an error occurred during decompression
+                    if (!!err)
+                        console.log("Error: " + err);
+
+                    ts.hide();
+                },
+                function(percent)
+                {
 //                    ts.onProgress(percent*100);
-//                    console.log("progress: " + percent*100 + "%");
-//                }
-//            );
+                    ts.progress(percent*100);
+                    console.log("progress: " + percent*100 + "%");
+                }
+            );
         },
         function(err)
         {
