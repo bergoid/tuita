@@ -59,9 +59,6 @@ fl.build = function(container, layout)
         ra.append(container, layout);
 
     return container;
-};
-
-//
 return fl;
 
 });})(this);

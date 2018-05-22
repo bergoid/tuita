@@ -5,13 +5,13 @@ define(['radi'], function (ra) {
 var sb = {};
 
 var dirClass = {
-    column: "sbColumn",
-    row: "sbRow"
+    column: "sbTrack sbColumn",
+    row: "sbTrack sbRow"
 };
 
 var splitterClass = {
-    column: "sbHorSplitter",
-    row: "sbVerSplitter"
+    column: "sbSplitter sbHorizontal",
+    row: "sbSplitter sbVertical"
 };
 
 var dim = {
@@ -19,21 +19,72 @@ var dim = {
     row: "width"
 };
 
-//
-var enableGrow = function(root)
+sb.css = function()
 {
-    if ( (ra.hasClass(root, "sbRow")) || (ra.hasClass(root, "sbColumn")) )
+    return ra.create
+    (
+        "style",
+        {
+            type: "text/css",
+            innerHTML: "\
+            .sbPanel\
+            {\
+                flex-grow: 1;\
+            }\
+            .sbTrack\
+            {\
+                display: flex;\
+                flex-grow: 1;\
+            }\
+            .sbRow\
+            {\
+                flex-flow: row nowrap;\
+            }\
+            .sbColumn\
+            {\
+                flex-flow: column nowrap;\
+            }\
+            .sbSplitter\
+            {\
+                flex-grow: 0;\
+                background-color: #C0C0C0;\
+            }\
+            .sbSplitter:hover\
+            {\
+                background-color: #E0E0E0;\
+            }\
+            .sbHorizontal\
+            {\
+                min-width: 100%;\
+                min-height: 8px;\
+                cursor: row-resize;\
+            }\
+            .sbVertical\
+            {\
+                min-width: 8px;\
+                min-height: 100%;\
+                cursor: col-resize;\
+            }\
+            "
+        }
+    );
+};
+
+//
+var enableGrow = function(rootElem)
+{
+    if ( (ra.hasClass(rootElem, "sbTrack")) )
     {
-        var dir = getComputedStyle(root)["flex-direction"];
+        var dir = getComputedStyle(rootElem)["flex-direction"];
 
         // Store size of panels in array
         var sizes = [];
         ra.forEach
         (
-            root.children,
+            rootElem.children,
             function(elem)
             {
-               if (ra.hasClass(elem, "sbPanel"))
+                if (!ra.hasClass(elem, "sbSplitter"))
                     sizes.push(parseInt(getComputedStyle(elem)[dim[dir]], 10));
             }
         );
@@ -42,10 +93,10 @@ var enableGrow = function(root)
         var sum = sizes.reduce(function(a, b) { return a + b; });
         ra.forEach
         (
-            root.children,
+            rootElem.children,
             function(elem, i)
             {
-                if (ra.hasClass(elem, "sbPanel"))
+                if (!ra.hasClass(elem, "sbSplitter"))
                 {
                     setFlex(elem, sizes[i/2]/sum, sizes[i/2]/sum, 0);
                     enableGrow(elem);
@@ -107,14 +158,14 @@ var createSplitter = function(dir, prevPanel)
         if (!isDragging)
         {
             isDragging = true;
-            // growEnabled = false;
 
             element.parentNode && element.parentNode.children && ra.forEach
             (
                 element.parentNode.children,
                 function(elem)
                 {
-                    if (ra.hasClass(elem, "sbPanel"))
+//                    if (ra.hasClass(elem, "sbPanel"))
+                    if (!ra.hasClass(elem, "sbSplitter"))
                         elem.sbStoredSize = parseInt(getComputedStyle(elem)[dim[dir]], 10);
                 }
             );
@@ -124,7 +175,8 @@ var createSplitter = function(dir, prevPanel)
                 element.parentNode.children,
                 function(elem)
                 {
-                    if (ra.hasClass(elem, "sbPanel"))
+//                    if (ra.hasClass(elem, "sbPanel"))
+                    if (!ra.hasClass(elem, "sbSplitter"))
                         setFlex(elem, 0, 0 , elem.sbStoredSize);
                 }
             );
@@ -141,8 +193,8 @@ var createSplitter = function(dir, prevPanel)
     {
         isDragging = false;
 
-        window.removeEventListener('mousemove', drag);
-        window.removeEventListener('mouseup', endDrag);
+        root.removeEventListener('mousemove', drag);
+        root.removeEventListener('mouseup', endDrag);
 
         element.parentNode && enableGrow(element.parentNode);
     };
@@ -155,8 +207,8 @@ var createSplitter = function(dir, prevPanel)
         {
             evt.preventDefault();    // prevent text selection
             lastPos = getPos(evt);
-            window.addEventListener('mousemove', drag);
-            window.addEventListener('mouseup', endDrag);
+            root.addEventListener('mousemove', drag);
+            root.addEventListener('mouseup', endDrag);
         }
     );
 
@@ -169,44 +221,78 @@ var createSplitter = function(dir, prevPanel)
 };
 
 //
-sb.draw = function(container, layout)
+sb.build = function(container, layout)
 {
-    if (ra.isElement(layout))
+    if ((layout.srow) || (layout.scol))
     {
-        container.appendChild(layout);
-        return;
-    }
+        var dir = (layout.srow) ? "row" : "column";
+        var layoutChildren = (layout.srow) ? layout.srow : layout.scol;
 
-    var dir = (layout.row) ? "row" : "column";
-    var panels = (layout.row) ? layout.row : layout.column;
+        ra.addClass(container, dirClass[dir]);
 
-    ra.addClass(container, dirClass[dir]);
+        var splitter = undefined;
 
-    var splitter = undefined;
+        ra.forEach
+        (
+            layoutChildren,
+            function(layoutChild, index)
+            {
+                var elemChild;
 
-    ra.forEach
-    (
-        panels,
-        function(panelLayout, index)
-        {
-            var panelElem = ra.create
-            (
-                "div",
+                if (ra.isElement(layoutChild))
                 {
-                    className: "sbPanel"
+                    elemChild = ra.append(container, layoutChild);
+                }
+                else
+                {
+                    elemChild = ra.append
+                    (
+                        container,
+                        "div"/*,
+                        {
+                            className: "sbPanel"
+                        }*/
+                    );
+                }
+                if (index>0)
+                {
+                    splitter.setNextPanel(elemChild);
+                }
+                if (index<layoutChildren.length-1)
+                {
+                    splitter = createSplitter(dir, elemChild);
+                    container.appendChild(splitter.element);
+                }
+
+                if (elemChild != layoutChild)
+                    sb.build(elemChild, layoutChild);
+
+            }
+        );
+    }
+    else
+        if ((layout.row) || (layout.col))
+        {
+            var layoutChildren = (layout.row) ? layout.row : layout.col;
+            var dir = (layout.row) ? "row" : "column";
+
+            ra.addClass(container, dirClass[dir]);
+
+            ra.forEach
+            (
+                layoutChildren,
+                function(layoutChild)
+                {
+                    sb.build(container, layoutChild);
                 }
             );
-            container.appendChild(panelElem);
-            if (index>0)
-                splitter.setNextPanel(panelElem);
-            if (index<panels.length-1)
-            {
-                splitter = createSplitter(dir, panelElem);
-                container.appendChild(splitter.element);
-            }
-            sb.draw(panelElem, panelLayout);
         }
-    );
+        else
+        {
+            ra.append(container, layout);
+        }
+
+    return container;
 };
 
 //

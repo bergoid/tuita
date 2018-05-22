@@ -4,8 +4,6 @@ define(['radi', 'flexlayout'], function (ra, fl) {
 'use strict';
 var app = {};
 
-var container = undefined;
-
 //
 var bodyCss = function()
 {
@@ -22,13 +20,32 @@ var bodyCss = function()
                     height: 100vh;\
                     max-height: 100vh;\
                     margin: 0;\
-                    padding: 1em;\
+                    border: 0;\
+                    padding: 0;\
                     overflow: hidden;\
+                }\
+                .smallCell\
+                {\
+                    flex-grow: 0;\
+                    flex-basis: 20%;\
+                }\
+                .bigCell\
+                {\
+                    flex-grow: 0;\
+                    flex-basis: 60%;\
                 }\
                 .leaf\
                 {\
                     flex-grow: 1;\
                     border: 1px solid #8080ff;\
+                }\
+                .container\
+                {\
+                    display: flex;\
+                    flex-flow: column nowrap;\
+                    flex-grow: 1;\
+                    margin: 1em;\
+                    border: 2px solid #808080;\
                 }\
                 "
         }
@@ -42,8 +59,20 @@ var containerDOM = function()
     (
         "div",
         {
-            id: "idContainer",
             className: "container"
+        }
+    );
+};
+
+//
+var leafDOM = function(content)
+{
+    return ra.create
+    (
+        "div",
+        {
+            className: "leaf",
+            innerHTML: content
         }
     );
 };
@@ -53,12 +82,9 @@ var layout =
 {
     column:
     [
+        "atest",
         [
-            "div",
-            {
-                className: "leaf",
-                innerHTML: "A"
-            }
+            leafDOM("leafDOM() test")
         ],
         [
             "div",
@@ -77,24 +103,25 @@ var layout =
         {
             row:
             [
+                "ihello",
                 [
                     "div",
                     {
-                        className: "leaf",
+                        className: "leaf smallCell",
                         innerHTML: "D1"
                     }
                 ],
                 [
                     "div",
                     {
-                        className: "leaf",
+                        className: "leaf smallCell",
                         innerHTML: "D2"
                     }
                 ],
                 [
                     "div",
                     {
-                        className: "leaf",
+                        className: "leaf bigCell",
                         innerHTML: "D3"
                     }
                 ],
@@ -106,17 +133,19 @@ var layout =
 //
 app.go = function(state)
 {
+    var container = containerDOM();
+
     ra.append
     (
         ra.body(),
         [
             bodyCss(),
-            fl.css()
+            fl.css(),
+            container
         ]
     );
 
-//    fl.build(container, layout);
-    fl.build(ra.body(), layout);
+    fl.build(container, layout);
 };
 
 //

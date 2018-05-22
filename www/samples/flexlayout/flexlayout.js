@@ -17,11 +17,17 @@ fl.css = function()
                 {\
                         display: flex;\
                         flex-flow: row nowrap;\
+                        flex-grow: 1;\
                 }\
                 .flColumn\
                 {\
                         display: flex;\
                         flex-flow: column nowrap;\
+                        flex-grow: 1;\
+                }\
+                .flPanel\
+                {\
+                    flex-grow: 1;\
                 }\
                 "
         }
@@ -45,6 +51,12 @@ fl.build = function(container, layout)
                 }
             ]
         );
+
+        // If the array of children starts with a literal string,
+        // pop it from the array and add its contents to the
+        // parent's classes.
+        if (children.length && (typeof children[0] === "string"))
+            ra.addClass(parent, children.splice(0,1)[0]);
 
         ra.forEach
         (
