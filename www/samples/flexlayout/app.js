@@ -37,6 +37,7 @@ var bodyCss = function()
                 .leaf\
                 {\
                     flex-grow: 1;\
+                    flex-shrink: 1;\
                     border: 1px solid #8080ff;\
                 }\
                 .container\
@@ -77,54 +78,47 @@ var leafDOM = function(content)
     );
 };
 
+
 //
 var layout =
 {
-    column:
+    srow:
     [
-        "atest",
-        [
-            leafDOM("leafDOM() test")
-        ],
-        [
-            "div",
-            {
-                className: "leaf",
-                innerHTML: "B"
-            }
-        ],
-        [
-            "div",
-            {
-                className: "leaf",
-                innerHTML: "C"
-            }
-        ],
         {
-            row:
+            scol:
             [
-                "ihello",
-                [
-                    "div",
-                    {
-                        className: "leaf smallCell",
-                        innerHTML: "D1"
-                    }
-                ],
-                [
-                    "div",
-                    {
-                        className: "leaf smallCell",
-                        innerHTML: "D2"
-                    }
-                ],
-                [
-                    "div",
-                    {
-                        className: "leaf bigCell",
-                        innerHTML: "D3"
-                    }
-                ],
+                leafDOM("A1"),
+                leafDOM("A2"),
+                leafDOM("A3")
+            ]
+        },
+        {
+            scol:
+            [
+                leafDOM("B"),
+                {
+                    srow:
+                    [
+                        leafDOM("C1"),
+                        leafDOM("C2"),
+                        leafDOM("C3")
+                    ]
+                },
+                {
+                    srow:
+                    [
+                        leafDOM("D"),
+                        {
+                            scol:
+                            [
+                                leafDOM("E1"),
+                                leafDOM("E2"),
+                                leafDOM("E3")
+                            ]
+                        },
+                        leafDOM("D3")
+                    ]
+                }
             ]
         }
     ]
