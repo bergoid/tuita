@@ -1,4 +1,13 @@
 
+. create sample flexlayout
+    v create a module called "flexlayout"
+        v by simplifying splitbox
+        v allow panels to be defined like in ra.append() / ra.create()
+        v allow tracks with & w/o splitters
+        v custom CSS for splitters
+        . build UI of c01
+        . this means: center panel of toplevel column is splitbox
+
 . when "Missing data string": show something useful on page.
     . load a specific version/context
         . this context shows a markdown page with info about tuita
@@ -8,13 +17,6 @@
 
 . TODO : sbColum: take up all space in non-dir too
 . sbPanel mix-in class instead of injected parent div?
-. create sample flexlayout
-    v create a module called "flexlayout"
-        v by simplifying splitbox
-        v allow panels to be defined like in ra.append() / ra.create()
-        . build UI of c01
-        . this means: center panel of toplevel column is splitbox
-
 . versioning:
     . v00 : current WIP. Will become version #N>0 when finished
 

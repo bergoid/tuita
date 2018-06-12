@@ -85,7 +85,7 @@ var layout =
     srow:
     [
         {
-            scol:
+            col:
             [
                 leafDOM("A1"),
                 leafDOM("A2"),
@@ -97,7 +97,7 @@ var layout =
             [
                 leafDOM("B"),
                 {
-                    srow:
+                    row:
                     [
                         leafDOM("C1"),
                         leafDOM("C2"),
