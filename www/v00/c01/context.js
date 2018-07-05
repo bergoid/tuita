@@ -1,8 +1,17 @@
 (function (root, undefined) {
-define(["vn/radi", "ct/fsm", "ct/flexlayout", "ct/splitbox", "vn/tuitasplash", "vn/" + ((!!root.Worker) ? "lz64" : "lz64i")], function (ra, fsm, fl, sb, ts, lz64) {
+define(["vn/radi", "ct/fsm", "ct/flexlayout", /*"vn/tuitasplash",*/ "vn/" + ((!!root.Worker) ? "lz64" : "lz64i")], function (ra, fsmlib, fl, /*ts,*/ lz64) {
 
 'use strict';
 var context = {};
+
+var progressBar = ra.createProgressBar("idProgressBar", "flexChild progressBar", "progressIndicator");
+
+var fsm = fsmlib.create("fsm", [ "null", "Ready" ]);
+
+//
+fsm.transition["null"]["Ready"] = function()
+{
+}
 
 //
 var bodyCss = function()
@@ -20,21 +29,133 @@ var bodyCss = function()
                 height: 100vh;\
                 max-height: 100vh;\
                 margin: 0;\
-                padding: 1em;\
+                border: 0;\
+                padding: 0;\
                 overflow: hidden;\
+                background-color: #606060;\
+                font-family: sans-serif;\
             }\
-            .plainTextArea\
+            textarea\
+            {\
+                resize: none;\
+                border: none;\
+                padding: 0.2em;\
+            }\
+            .container\
             {\
                 flex-grow: 1;\
+                margin: 0.5em;\
+                background-color: #FFFFFF;\
             }\
-            .compressedTextArea\
+            .flexColumn\
+            {\
+                display: flex;\
+                flex-flow: column nowrap;\
+            }\
+            .flexRow\
+            {\
+                display: flex;\
+                flex-flow: row nowrap;\
+            }\
+            .flexChild\
             {\
                 flex-grow: 1;\
+                flex-shrink: 1;\
             }\
-            .bottomElement\
+            .fitChild\
             {\
-                flex-grow: 1;\
-                border: 1px solid #8080ff;\
+                flex-grow: 0;\
+                flex-shrink: 0;\
+            }\
+            .verSplitter\
+            {\
+                flex-grow: 0;\
+                flex-shrink: 0;\
+                background-color: #606060;\
+            }\
+            .verSplitter:hover\
+            {\
+                background-color: #808080;\
+            }\
+            .toolpanel\
+            {\
+                background-color: #606060;\
+                color: #FFFFFF;\
+                padding: 0.5em;\
+            }\
+            .compresspanel\
+            {\
+            }\
+            .decompresspanel\
+            {\
+            }\
+            .visible\
+            {\
+                visibility: visible;\
+            }\
+            .invisible\
+            {\
+                visibility: hidden;\
+            }\
+            .floatright\
+            {\
+                float: right;\
+            }\
+            .progressBar\
+            {\
+                border-color: #F9B256;\
+                border-width: 3px;\
+                visibility: hidden;\
+            }\
+            .progressIndicator\
+            {\
+                background-color: #F9B256;\
+                visibility: hidden;\
+            }\
+            .button\
+            {\
+                margin: 0 auto;\
+                display: table;\
+                margin-left: 0.2em;\
+                margin-right: 0.2em;\
+            }\
+            .button>a,.button>span\
+            {\
+                padding: 1.0em;\
+                text-decoration:none;\
+                display: table-cell;\
+            }\
+            .button.enabled>a\
+            {\
+                background-color: #90D0E0;\
+                color: #000000;\
+            }\
+            .button.enabled>a:hover\
+            {\
+                background-color: #A0E0FF;\
+                color: #000000;\
+            }\
+            .button.enabled.selected>a:hover\
+            {\
+                background-color: #A0E0FF;\
+            }\
+            .button.enabled.selected>a\
+            {\
+                background-color: #90D0E0;\
+            }\
+            .button.enabled>a:focus\
+            {\
+                outline: 3px solid transparent;\
+            }\
+            .button.disabled>span\
+            {\
+                background-color: #E0E0E0;\
+                color: #000000;\
+            }\
+            .button.disabled.selected>span\
+            {\
+                background-color: #E0E0E0;\
+                color: #000000;\
             }\
             "
         }
@@ -42,128 +163,163 @@ var bodyCss = function()
 };
 
 //
-var LPaneDOM = function()
+var flexDOM = function(content, extraClasses)
 {
-    var lPaneLayout = {
-        column:
-        [
-            [
-                "div",
-                {
-                    innerHTML: "<-- decompress"
-                }
-            ],
-            [
-                "div",
-                {
-                    className: "compressedTextArea",
-                    innerHTML: "L pane"
-                }
-            ],
-            [
-                "div",
-                {
-                    innerHTML: "Size of plaintext"
-                }
-            ]
+    var className = "flexChild";
 
-        ]
-    };
+    if (extraClasses)
+        className += " " + extraClasses;
 
-    var lPane = ra.create("div");
-    return fl.build(lPane, lPaneLayout);
+    return ra.create
+    (
+        "div",
+        {
+            className: className,
+            innerHTML: content
+        }
+    );
 };
 
 //
-var RPaneDOM = function()
+var containerDOM = function()
 {
-    var rPaneLayout = {
-        column:
-        [
-            [
-                "div",
-                {
-                    innerHTML: "compress -->"
-                }
-            ],
-            [
-                "div",
-                {
-                    className: "plainTextArea",
-                    innerHTML: "R pane"
-                }
-            ],
-            [
-                "div",
-                {
-                    innerHTML: "Size of compressed text"
-                }
-            ]
-
-        ]
-    };
-
-    var rPane = ra.create("div");
-    return fl.build(rPane, rPaneLayout);
+    return ra.create
+    (
+        "div",
+        {
+            className: "container flexColumn"
+        }
+    );
 };
 
 //
-var panesDOM = function()
+var compressDOM = function()
 {
-    var panesLayout = {
-        row:
+    return ra.create
+    (
+        "div",
+        {
+            className: "fitChild toolpanel compresspanel",
+        },
         [
-            RPaneDOM(),
-            LPaneDOM()
+            ra.styledButton("idCompressButton", "Compress -->", function(){/*onclick*/}, true, "button floatright", "Compress (LZMA) the text in the left pane and show the result in the right pane (encoded with a base64 variant).")
         ]
-    };
-
-    var panes = ra.create("div");
-    return sb.build(panes, panesLayout);
+    );
 };
 
-var buildUI = function(decompressedResult)
+//
+var decompressDOM = function()
+{
+    return ra.create
+    (
+        "div",
+        {
+            className: "fitChild toolpanel decompresspanel",
+        },
+        [
+            ra.styledButton("idDeCompressButton", "<-- Decompress", function(){/*onclick*/}, true, "button", "Decompress the encoded text in the right pane and show the plaintet result in the left pane.")
+        ]
+    );
+};
+
+//
+var plaintextDOM = function()
+{
+    return ra.create
+    (
+        "textarea",
+        {
+            id: "idPlainText",
+            className: "flexChild",
+            placeholder: "plaintext"
+        }
+    );
+};
+
+//
+var compressedtextDOM = function()
+{
+    return ra.create
+    (
+        "textarea",
+        {
+            id: "idCompressedText",
+            className: "flexChild",
+            placeholder: "compressed text"
+        }
+    );
+};
+
+//
+var progressDOM = function()
+{
+    return ra.create
+    (
+        "div",
+        {
+            className: "flexChild flexColumn toolpanel"
+        },
+        [
+            progressBar.element
+        ]
+    );
+};
+
+var buildUI = function()
 {
     //
     var layout =
     {
-        column:
+        col:
         [
-            panesDOM(),
+            {
+                srow:
+                [
+                    {
+                        splitterClasses: "verSplitter"
+                    },
+                    {
+                        col:
+                        [
+                            compressDOM(),
+                            plaintextDOM(),
+                            flexDOM("size of plaintext", "fitChild toolpanel")
+                        ]
+                    },
+                    {
+                        col:
+                        [
+                            decompressDOM(),
+                            compressedtextDOM(),
+                            flexDOM("size of compressed text", "fitChild toolpanel")
+                        ]
+                    },
+                ]
+            },
             {
                 row:
                 [
-                    [
-                        "div",
-                        {
-                            className: "bottomElement",
-                            innerHTML: "progress bar"
-                        }
-                    ],
-                    [
-                        "div",
-                        {
-                            className: "bottomElement",
-                            innerHTML: "message"
-                        }
-                    ]
+                    "fitChild",
+                    progressDOM(),
+                    flexDOM("Message", "toolpanel")
                 ]
             }
         ]
     };
+
+    var container = containerDOM();
 
     ra.append
     (
         ra.body(),
         [
             fl.css(),
-            sb.css(),
             bodyCss(),
+            container
         ]
     );
 
-    fl.build(ra.body(), layout);
-
+    fl.build(container, layout);
 };
 
 //
@@ -172,11 +328,15 @@ context.go = function(dataString)
     var compressedData = dataString.substring(4);
     var decompressedResult = "";
 
-    if (compressedData.length > 0)
+    buildUI();
+
+
     {
         ra.log("input: " + compressedData);
 
-        ts.show();
+        ra.el("idCompressedText").value = compressedData;
+
+        ra.showElement(progressBar.element, true);
 
         lz64.decompress
         (
@@ -185,22 +345,11 @@ context.go = function(dataString)
             {
                 if (!!res)
                 {
-                    ts.hide();
+                    ra.showElement(progressBar.element, false);
 
                     decompressedResult = res;
 
                     ra.log("Decompressed result: " + decompressedResult);
-
-    //                ra.body().appendChild
-    //                (
-    //                    ra.create
-    //                    (
-    //                        "textarea",
-    //                        {
-    //                            value: res
-    //                        }
-    //                    )
-    //                );
                 }
 
                 if (!!err)
@@ -209,14 +358,10 @@ context.go = function(dataString)
             function(progessFraction)
             {
                 var percent = progessFraction * 100;
-                ts.progress(percent);
-                //                    ra.log("progress: " + percent + "%");
+                progressBar.setProgress(30);
             }
         );
     }
-
-    buildUI(decompressedResult);
-
 };
 
 //

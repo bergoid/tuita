@@ -84,7 +84,6 @@ var enableGrow = function(rootElem)
 
         // Store size of panels in array
         var sizes = [];
-        var splitterSiblings = false;
         ra.forEach
         (
             rootElem.children,
@@ -92,8 +91,6 @@ var enableGrow = function(rootElem)
             {
                 if (!ra.hasClass(elem, "flSplitter"))
                     sizes.push(parseInt(getComputedStyle(elem)[dim[dir]], 10));
-                else
-                    splitterSiblings = true;
             }
         );
 
@@ -106,10 +103,8 @@ var enableGrow = function(rootElem)
             {
                 if (!ra.hasClass(elem, "flSplitter"))
                 {
-                    var index = splitterSiblings ? i/2 : i;
-                    var size = sizes[index]/sum;
+                    var size = sizes[i/2]/sum;
                     setFlex(elem, size, size, 0);
-                    enableGrow(elem);
                 }
             }
         );

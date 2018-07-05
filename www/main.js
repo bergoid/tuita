@@ -34,6 +34,8 @@
         context : "c" + dataString.substring(2,4)
     };
 
+    root.console.log("vn == " + root.tuita.version);
+
     requirejs.config
     ({
         paths: {

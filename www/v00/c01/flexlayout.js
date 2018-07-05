@@ -1,5 +1,5 @@
 (function (root, undefined) {
-define(['radi'], function (ra) {
+define(['vn/radi'], function (ra) {
 
 'use strict';
 var fl = {};
@@ -61,12 +61,12 @@ fl.css = function()
             .flHorizontal\
             {\
                 min-width: 100%;\
-                flex-basis: 8px;\
+                flex-basis: 2.5mm;\
                 cursor: row-resize;\
             }\
             .flVertical\
             {\
-                flex-basis: 8px;\
+                flex-basis: 2.5mm;\
                 min-height: 100%;\
                 cursor: col-resize;\
             }\
@@ -103,8 +103,8 @@ var enableGrow = function(rootElem)
             {
                 if (!ra.hasClass(elem, "flSplitter"))
                 {
-                    setFlex(elem, sizes[i/2]/sum, sizes[i/2]/sum, 0);
-                    enableGrow(elem);
+                    var size = sizes[i/2]/sum;
+                    setFlex(elem, size, size, 0);
                 }
             }
         );
@@ -223,13 +223,37 @@ var createSplitter = function(dir, prevPanel)
 };
 
 //
-var setCustomClass = function(elem, layoutChildren)
+var setCustomClass = function(elem, layoutChildren, customClasses)
 {
     // If the array of layoutChildren starts with a literal string,
     // pop it from the array and add its contents to the
     // elem's classes.
     if (layoutChildren.length && (layoutChildren.length > 0) && (typeof layoutChildren[0] === "string"))
         ra.addClass(elem, layoutChildren.splice(0,1)[0]);
+
+    // If the array of layoutChildren starts with an object containing
+    // properties with custom classes for flexlayout tracks or splitters,
+    // pop it from the array and add its contents to the argument
+    // 'customClasses'.
+    if (customClasses)
+    {
+        if (layoutChildren.length && (layoutChildren.length > 0))
+        {
+            if ( (layoutChildren[0].trackClasses) || (layoutChildren[0].splitterClasses) )
+            {
+                var customClasses_in = layoutChildren.splice(0,1)[0];
+
+                if (customClasses_in.trackClasses)
+                {
+                    customClasses.trackClasses = customClasses_in.trackClasses;
+                    ra.addClass(elem, customClasses.trackClasses);
+                }
+
+                if (customClasses_in.splitterClasses)
+                    customClasses.splitterClasses = customClasses_in.splitterClasses;
+            }
+        }
+    }
 };
 
 //
@@ -251,7 +275,8 @@ fl.build = function(container, layout)
             ]
         );
 
-        setCustomClass(trackElem, layoutChildren);
+        var customClasses = {};
+        setCustomClass(trackElem, layoutChildren, customClasses);
 
         var splitter = undefined;
 
@@ -271,7 +296,11 @@ fl.build = function(container, layout)
 
                 if (index<layoutChildren.length-1)
                 {
-                    splitter = createSplitter(dir, elemChild);
+                    splitter = createSplitter(dir, elemChild, customClasses);
+
+                    if (customClasses.splitterClasses)
+                        ra.addClass(splitter.element, customClasses.splitterClasses);
+
                     trackElem.appendChild(splitter.element);
                 }
             }
@@ -296,7 +325,7 @@ fl.build = function(container, layout)
                 ]
             );
 
-            setCustomClass(trackElem, layoutChildren);
+            setCustomClass(trackElem, layoutChildren, customClasses);
 
             ra.forEach
             (

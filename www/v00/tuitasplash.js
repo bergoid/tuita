@@ -50,7 +50,7 @@ ts.show = function()
             [
                 "div",
                 {
-                    classname: "ts_text",
+                    className: "ts_text",
                     innerHTML: "unpacking app ..."
                 }
             ],

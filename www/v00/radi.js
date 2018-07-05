@@ -124,7 +124,13 @@ ra.getKey = function(event)
     */
 }
 
-//
+// TODO : rename to "ra.el()" ?
+ra.select = function(query)
+{
+    return root.document.querySelector(query);
+}
+
+// TODO : replace by implementation of "ra.select()" ?
 ra.el = function (id)
 {
     return root.document.getElementById(id);
@@ -557,6 +563,45 @@ ra.checkBox = function(id, label, onclick, enable, extraClasses)
 };
 
 //
+ra.createProgressBar = function(id, barClasses, indicatorClasses, barStyle, indicatorStyle)
+{
+    var element = ra.create
+    (
+        [
+            "div",
+            {
+                id: id,
+                style: "display: flex;flex-direction: row;justify-content: flex-start;align-items: stretch;border-style: solid;" + ((barStyle) ? barStyle : ""),
+                className: ((barClasses) ? barClasses : "")
+            },
+            [
+                "div",
+                {
+                    style: "flex: 0 0 0%;" + ((indicatorStyle) ? indicatorStyle : ""),
+                    className: ((indicatorClasses) ? indicatorClasses : "")
+                }
+            ]
+        ]
+    );
+
+    //
+    var setProgress = function(progress)
+    {
+        var percent = Math.max(progress, 0);
+        percent = Math.min(percent, 100);
+
+        if (element && element.firstChild)
+            element.firstChild.style.flexBasis = "" + percent + "%";
+    };
+
+    //
+    return {
+        element: element,
+        setProgress : setProgress
+    };
+};
+
+//
 ra.enableElement = function(el, enable, remember)
 {
     var enable_core = function(el, enable)
@@ -616,6 +661,21 @@ ra.enableElementTree = function(el, enable, remember)
     }
     else
         ra.warn("ra.enableElementTree() : arg 'el' undefined");
+};
+
+//
+ra.showElement = function(element, visible)
+{
+    element.style.visibility = (visible ? "visible" : "hidden");
+
+    ra.forEach
+    (
+        element.children,
+        function(elem)
+        {
+            ra.showElement(elem, visible);
+        }
+    );
 };
 
 //

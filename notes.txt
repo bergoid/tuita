@@ -1,26 +1,5 @@
 
-. create sample flexlayout
-    v create a module called "flexlayout"
-        v by simplifying splitbox
-        v allow panels to be defined like in ra.append() / ra.create()
-        v allow tracks with & w/o splitters
-        v custom CSS for splitters
-        . build UI of c01
-        . this means: center panel of toplevel column is splitbox
-
-. when "Missing data string": show something useful on page.
-    . load a specific version/context
-        . this context shows a markdown page with info about tuita
-        . vOO/c00 ?
-        . datastring is error msg
-            . if not empty: show rectangle with message on top of page
-
-. TODO : sbColum: take up all space in non-dir too
-. sbPanel mix-in class instead of injected parent div?
-. versioning:
-    . v00 : current WIP. Will become version #N>0 when finished
-
-. c00: null context: all code must be extracted from 'd' URL parameter
+. look up teamviewer css
 
 . c01: diagnostic tool:
     . 2 textarea panes side-by-side
@@ -54,13 +33,50 @@
 
     . when called with ?d=0001 : both panes are empty
     . when called with ?d=0001STRING : STRING in R pane, text decompressed from STRING in L pane.
+        . build UI of c01
+        . this means: center panel of toplevel column is splitbox
+
+
+
+. v00/c02: context showing a webpage rendered from MarkDown.
+    . MD code is lz64-encoded in datastring
+    . there is an optional 'e=' URL parameter containing an lz64-encoded error message.
+        . if present and non-empty, the message is displayed in a red rectangle on top of page.
+        . allow MD in error message?
+            . could be useful to provide hyperlinks
+
+. when "Missing data string": show something useful on page.
+    . load the context c02
+        . only if the missing data is an error:
+            . provide a non-empty 'e=' URL parameter
+        . 'd=0002STRING' with STRING containing an info page about tuita.
+        . situations where mising data is not an error:
+            . an absent '?d=vvccSTRING'
+            . '?d=0001'
+                . diagn. tool (c01) with empty text areas
+            . '?d=0002'
+                . show tuita info
+            . '?d=0002&e=STRING'
+                . if decoding of STRING succeeds, display it
+                . if the decoding fails: display the failure message instead
+            . '?d=0001&e=STRING'
+                . 'e=' must be ignored
+
+. splitbox : use new flexlayout
+
+. version.js/context.js : use promises to simplify callbacks
+
+. TODO : sbColum: take up all space in non-dir too
+
+. versioning:
+    . v00 : current WIP. Will become version #N>0 when finished
+
+. c00: null context: all code must be extracted from 'd' URL parameter
 
     v split off tuitaprogress from tuitasplash
     . use fsm, splitbox
 
-. put on GH
-
-. splitbox: make the layout system as flexible as flexlayout
+v put on GH
 
 . wait for page load (onload) in main.js?
 
@@ -68,6 +84,14 @@
     . OK for same URL with other arg(s)
     ; for other sub-URLs: requires a 404 page
 
+
+
+v create sample flexlayout
+    v create a module called "flexlayout"
+        v by simplifying splitbox
+        v allow panels to be defined like in ra.append() / ra.create()
+        v allow tracks with & w/o splitters
+        v custom CSS for splitters
 
 v requirejs -> config -> use 'map'
     v pass prefix for ww.js to lz64w.js
