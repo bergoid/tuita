@@ -1,5 +1,21 @@
 
-. look up teamviewer css
+. setting textarea to readonly doesn't work
+
+. FSM:
+    . States:
+        . Ready
+        . Compressing
+        . Decompressing
+
+    . Transitions:
+        . null -> Ready
+        . Ready:
+            -> Compressing
+            -> Decompressing
+        . Compressing:
+            -> Ready
+        . Decompressing:
+            -> Ready
 
 . c01: diagnostic tool:
     . 2 textarea panes side-by-side
@@ -15,6 +31,8 @@
         . compression factor
 
     . bottom: room for a progress bar and a message (either "decompressing ..." or "compressing ...")
+
+    . merge fsmlib into radi
 
     . layout:
         . flexlayout column:

@@ -6,12 +6,61 @@ var context = {};
 
 var progressBar = ra.createProgressBar("idProgressBar", "flexChild progressBar", "progressIndicator");
 
-var fsm = fsmlib.create("fsm", [ "null", "Ready" ]);
+var fsm = fsmlib.create("fsm", [ "null", "Ready", "Compressing", "Decompressing" ]);
 
 //
 fsm.transition["null"]["Ready"] = function()
 {
-}
+    ra.log("Hello");
+};
+
+//
+fsm.transition["Ready"]["Compressing"] = function()
+{
+    ra.showElement(progressBar.element, true);
+
+    ra.enableElement(ra.el("idCompressButton"), false);
+    ra.enableElement(ra.el("idDecompressButton"), false);
+
+    ra.el("idPlainText").readonly = true;
+    ra.el("idCompressedText").readonly = true;
+};
+
+//
+fsm.transition["Ready"]["Decompressing"] = function()
+{
+    ra.showElement(progressBar.element, true);
+
+    ra.enableElement(ra.el("idCompressButton"), false);
+    ra.enableElement(ra.el("idDecompressButton"), false);
+
+    ra.el("idPlainText").readonly = true;
+    ra.el("idCompressedText").readonly = true;
+};
+
+//
+fsm.transition["Compressing"]["Ready"] = function()
+{
+    ra.showElement(progressBar.element, false);
+
+    ra.enableElement(ra.el("idCompressButton"), true);
+    ra.enableElement(ra.el("idDecompressButton"), true);
+
+    ra.el("idPlainText").readonly = false;
+    ra.el("idCompressedText").readonly = false;
+};
+
+//
+fsm.transition["Decompressing"]["Ready"] = function()
+{
+    ra.showElement(progressBar.element, false);
+
+    ra.enableElement(ra.el("idCompressButton"), true);
+    ra.enableElement(ra.el("idDecompressButton"), true);
+
+    ra.el("idPlainText").readonly = false;
+    ra.el("idCompressedText").readonly = false;
+};
 
 //
 var bodyCss = function()
@@ -217,7 +266,7 @@ var decompressDOM = function()
             className: "fitChild toolpanel decompresspanel",
         },
         [
-            ra.styledButton("idDeCompressButton", "<-- Decompress", function(){/*onclick*/}, true, "button", "Decompress the encoded text in the right pane and show the plaintet result in the left pane.")
+            ra.styledButton("idDecompressButton", "<-- Decompress", function(){/*onclick*/}, true, "button", "Decompress the encoded text in the right pane and show the plaintet result in the left pane.")
         ]
     );
 };
@@ -328,40 +377,41 @@ context.go = function(dataString)
     var compressedData = dataString.substring(4);
     var decompressedResult = "";
 
+    ra.log("Current state == " + fsm.getCurrentState());
+    ra.log("Compressed data == " + compressedData);
+
     buildUI();
 
+//    ra.log("input: " + compressedData);
 
-    {
-        ra.log("input: " + compressedData);
+    ra.el("idCompressedText").value = compressedData;
 
-        ra.el("idCompressedText").value = compressedData;
+    fsm.gotoState("Ready");
+    fsm.gotoState("Compressing");
 
-        ra.showElement(progressBar.element, true);
-
-        lz64.decompress
-        (
-            compressedData,
-            function(res, err)
-            {
-                if (!!res)
-                {
-                    ra.showElement(progressBar.element, false);
-
-                    decompressedResult = res;
-
-                    ra.log("Decompressed result: " + decompressedResult);
-                }
-
-                if (!!err)
-                    ra.log("Error: " + err);
-            },
-            function(progessFraction)
-            {
-                var percent = progessFraction * 100;
-                progressBar.setProgress(30);
-            }
-        );
-    }
+//    lz64.decompress
+//    (
+//        compressedData,
+//        function(res, err)
+//        {
+//            if (!!res)
+//            {
+//                ra.showElement(progressBar.element, false);
+//
+//                decompressedResult = res;
+//
+//                ra.log("Decompressed result: " + decompressedResult);
+//            }
+//
+//            if (!!err)
+//                ra.log("Error: " + err);
+//        },
+//        function(progessFraction)
+//        {
+//            var percent = progessFraction * 100;
+//            progressBar.setProgress(30);
+//        }
+//    );
 };
 
 //
