@@ -4,6 +4,9 @@ define(['vn/lzma', 'vn/us64'], function (lz, us64) {
 'use strict';
 var lz64i = {};
 
+// Valid values: 1-9
+var compressionLevel = 1;
+
 //
 lz64i.compress = function(input, on_finish, on_progress)
 {
@@ -13,7 +16,7 @@ lz64i.compress = function(input, on_finish, on_progress)
         lz.compress
         (
             input,
-            9,
+            compressionLevel,
             function(res, err)
             {
                 if (typeof err != "undefined")
@@ -36,11 +39,6 @@ lz64i.decompress = function(input, on_finish, on_progress)
         on_finish,
         on_progress
     );
-};
-
-lz64i.testFun = function()
-{
-    console.log("Hello from testFun()!");
 };
 
 //

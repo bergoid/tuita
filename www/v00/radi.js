@@ -52,6 +52,28 @@ ra.urlEncode = function(str)
     );
 };
 
+// From: https://stackoverflow.com/a/14919494/3805088
+ra.humanFileSize = function(bytes, useBinary)
+{
+    var thresh = useBinary ?  1024 : 1000;
+
+    if(Math.abs(bytes) < thresh)
+        return bytes + ' bytes';
+
+    var units = useBinary
+        ? ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB']
+        : ['kB','MB','GB','TB','PB','EB','ZB','YB'];
+    var u = -1;
+
+    do
+    {
+        bytes /= thresh;
+        ++u;
+    } while ( Math.abs(bytes) >= thresh && u < units.length - 1 );
+
+    return bytes.toFixed(1) + ' ' + units[u];
+};
+
 //
 ra.getRandom = function (from,to)
 {
@@ -89,7 +111,7 @@ ra.pushUnique = function(array, elem)
 {
     if (!ra.has(array, elem))
         array.push(elem);
-}
+};
 
 //
 ra.isArray = ('isArray' in Array) ? Array.isArray : function (value) {
@@ -106,7 +128,7 @@ ra.isString = function(value)
 ra.getEvent = function(event)
 {
     return (root.event == undefined) ? event : root.event;
-}
+};
 
 //
 ra.getKey = function(event)
@@ -122,13 +144,13 @@ ra.getKey = function(event)
     if (event.keyCode !== undefined)
         return event.keyCode;
     */
-}
+};
 
 // TODO : rename to "ra.el()" ?
 ra.select = function(query)
 {
     return root.document.querySelector(query);
-}
+};
 
 // TODO : replace by implementation of "ra.select()" ?
 ra.el = function (id)
@@ -226,6 +248,8 @@ ra.create = function(arg1, arg2, arg3)
             }
             else
                 // if arg1 is already an HTML elemtent: just return it
+                //
+                // TODO : return ra.append(arg1, arg2, arg3) ???
                 if (ra.isElement(arg1))
                     return arg1;
                 else
@@ -258,6 +282,7 @@ ra.append = function(parent, arg1, arg2, arg3)
 
     if (!!children)
         if (ra.isArray(children))
+        {
             ra.forEach
             (
                 children,
@@ -266,8 +291,12 @@ ra.append = function(parent, arg1, arg2, arg3)
                     ra.append(parent, child);
                 }
             )
+            return parent;
+        }
         else
+        {
             return parent.appendChild(children);
+        }
 };
 
 //
@@ -417,7 +446,7 @@ else
 ra.hasName = function(s, name)
 {
   return (s.search(new RegExp("\\b" + name + "\\b", "g"))!=-1);
-}
+};
 
 //
 ra.addName = function(s,name)

@@ -6,62 +6,73 @@ var context = {};
 
 var progressBar = ra.createProgressBar("idProgressBar", "flexChild progressBar", "progressIndicator");
 
-var fsm = fsmlib.create("fsm", [ "null", "Ready", "Compressing", "Decompressing" ]);
+var errorMessage = "";
 
+////////////////////////////////////////
+//                                    //
+//          Helper functions          //
+//                                    //
+////////////////////////////////////////
 //
-fsm.transition["null"]["Ready"] = function()
+var sizeFieldString = function(sizeInBytes)
 {
-    ra.log("Hello");
+    return "Size: " + ra.humanFileSize(sizeInBytes);
 };
 
 //
-fsm.transition["Ready"]["Compressing"] = function()
+var setTextAreaValue = function(id, value)
 {
-    ra.showElement(progressBar.element, true);
-
-    ra.enableElement(ra.el("idCompressButton"), false);
-    ra.enableElement(ra.el("idDecompressButton"), false);
-
-    ra.el("idPlainText").readonly = true;
-    ra.el("idCompressedText").readonly = true;
+    ra.el(id).value = value;
+    ra.el(id + "Size").innerHTML = sizeFieldString(value.length);
 };
 
 //
-fsm.transition["Ready"]["Decompressing"] = function()
+var setInfoMessage = function(message)
 {
-    ra.showElement(progressBar.element, true);
+    var el = ra.el("idMessage");
 
-    ra.enableElement(ra.el("idCompressButton"), false);
-    ra.enableElement(ra.el("idDecompressButton"), false);
+    if (!el)
+        return;
 
-    ra.el("idPlainText").readonly = true;
-    ra.el("idCompressedText").readonly = true;
+    ra.removeClass(el, "invisible");
+    ra.removeClass(el, "errorStyle");
+    ra.addClass(el, "visible infoStyle");
+
+    el.innerHTML = message;
 };
 
 //
-fsm.transition["Compressing"]["Ready"] = function()
+var setReadyMessage = function()
 {
-    ra.showElement(progressBar.element, false);
+    var el = ra.el("idMessage");
 
-    ra.enableElement(ra.el("idCompressButton"), true);
-    ra.enableElement(ra.el("idDecompressButton"), true);
+    if (!el)
+        return;
 
-    ra.el("idPlainText").readonly = false;
-    ra.el("idCompressedText").readonly = false;
+    if (errorMessage.length > 0)
+    {
+        ra.removeClass(el, "invisible");
+        ra.removeClass(el, "infoStyle");
+        ra.addClass(el, "visible errorStyle");
+
+        el.innerHTML = errorMessage;
+        errorMessage = "";
+    }
+    else
+    {
+        ra.removeClass(el, "visible");
+        ra.addClass(el, "invisible");
+
+        el.innerHTML = "Placeholder";
+    }
+
 };
 
-//
-fsm.transition["Decompressing"]["Ready"] = function()
-{
-    ra.showElement(progressBar.element, false);
-
-    ra.enableElement(ra.el("idCompressButton"), true);
-    ra.enableElement(ra.el("idDecompressButton"), true);
-
-    ra.el("idPlainText").readonly = false;
-    ra.el("idCompressedText").readonly = false;
-};
-
+////////////////////////////////////////
+//                                    //
+//              CSS                   //
+//                                    //
+////////////////////////////////////////
 //
 var bodyCss = function()
 {
@@ -146,6 +157,16 @@ var bodyCss = function()
             {\
                 visibility: hidden;\
             }\
+            .infoStyle\
+            {\
+                color: #ffffff;\
+                background-color: #00000000;\
+            }\
+            .errorStyle\
+            {\
+                color: #ffffff;\
+                background-color: #c00000;\
+            }\
             .floatright\
             {\
                 float: right;\
@@ -211,8 +232,25 @@ var bodyCss = function()
     );
 };
 
+////////////////////////////////////////
+//                                    //
+//          Event handlers            //
+//                                    //
+////////////////////////////////////////
 //
-var flexDOM = function(content, extraClasses)
+var onInput = function(event, buttonId, sizeFieldId)
+{
+    ra.enableElement(ra.el(buttonId), (event.target.value.length != 0));
+    ra.el(sizeFieldId).innerHTML = sizeFieldString(event.target.value.length);
+};
+
+////////////////////////////////////////
+//                                    //
+//              DOM                   //
+//                                    //
+////////////////////////////////////////
+//
+var flexDOM = function(id, content, extraClasses)
 {
     var className = "flexChild";
 
@@ -223,6 +261,7 @@ var flexDOM = function(content, extraClasses)
     (
         "div",
         {
+            id: id,
             className: className,
             innerHTML: content
         }
@@ -251,7 +290,7 @@ var compressDOM = function()
             className: "fitChild toolpanel compresspanel",
         },
         [
-            ra.styledButton("idCompressButton", "Compress -->", function(){/*onclick*/}, true, "button floatright", "Compress (LZMA) the text in the left pane and show the result in the right pane (encoded with a base64 variant).")
+            ra.styledButton("idCompressButton", "Compress ==>", function(){ fsm.gotoState("Compressing"); }, false, "button floatright", "Compress (LZMA) the text in the left pane and show the result in the right pane (encoded with a base64 variant).")
         ]
     );
 };
@@ -266,7 +305,7 @@ var decompressDOM = function()
             className: "fitChild toolpanel decompresspanel",
         },
         [
-            ra.styledButton("idDecompressButton", "<-- Decompress", function(){/*onclick*/}, true, "button", "Decompress the encoded text in the right pane and show the plaintet result in the left pane.")
+            ra.styledButton("idDecompressButton", "<== Decompress", function(){ fsm.gotoState("Decompressing"); }, false, "button", "Decompress the encoded text in the right pane and show the plaintet result in the left pane.")
         ]
     );
 };
@@ -280,7 +319,8 @@ var plaintextDOM = function()
         {
             id: "idPlainText",
             className: "flexChild",
-            placeholder: "plaintext"
+            placeholder: "plaintext",
+            oninput: function(event) { onInput(event, "idCompressButton", "idPlainTextSize"); }
         }
     );
 };
@@ -294,9 +334,28 @@ var compressedtextDOM = function()
         {
             id: "idCompressedText",
             className: "flexChild",
-            placeholder: "compressed text"
+            placeholder: "compressed text",
+            oninput: function(event) { onInput(event, "idDecompressButton", "idCompressedTextSize"); }
         }
     );
+};
+
+//
+var messageDOM = function()
+{
+    var el = flexDOM("", "", "toolpanel");
+
+    ra.append
+    (
+        el,
+        "span",
+        {
+            id: "idMessage",
+            className: "errorStyle"
+        }
+    );
+
+    return el;
 };
 
 //
@@ -314,6 +373,7 @@ var progressDOM = function()
     );
 };
 
+//
 var buildUI = function()
 {
     //
@@ -332,7 +392,7 @@ var buildUI = function()
                         [
                             compressDOM(),
                             plaintextDOM(),
-                            flexDOM("size of plaintext", "fitChild toolpanel")
+                            flexDOM("idPlainTextSize", sizeFieldString(0), "fitChild toolpanel")
                         ]
                     },
                     {
@@ -340,7 +400,7 @@ var buildUI = function()
                         [
                             decompressDOM(),
                             compressedtextDOM(),
-                            flexDOM("size of compressed text", "fitChild toolpanel")
+                            flexDOM("idCompressedTextSize", sizeFieldString(0), "fitChild toolpanel")
                         ]
                     },
                 ]
@@ -350,7 +410,7 @@ var buildUI = function()
                 [
                     "fitChild",
                     progressDOM(),
-                    flexDOM("Message", "toolpanel")
+                    messageDOM()
                 ]
             }
         ]
@@ -371,47 +431,147 @@ var buildUI = function()
     fl.build(container, layout);
 };
 
+////////////////////////////////////////
+//                                    //
+//                FSM                 //
+//                                    //
+////////////////////////////////////////
+var fsm = fsmlib.create("fsm", [ "null", "Ready", "Compressing", "Decompressing" ]);
+
+//
+fsm.transition["null"]["Ready"] = function()
+{
+    buildUI();
+};
+
+//
+fsm.transition["Ready"]["Compressing"] = function()
+{
+    setTextAreaValue("idCompressedText", "");
+
+    ra.showElement(progressBar.element, true);
+
+    ra.enableElement(ra.el("idCompressButton"), false);
+    ra.enableElement(ra.el("idDecompressButton"), false);
+
+    ra.el("idPlainText").readOnly = true;
+    ra.el("idCompressedText").readOnly = true;
+
+    setInfoMessage("Compressing ...");
+
+    lz64.compress
+    (
+        ra.el("idPlainText").value,
+        function(res, err)
+        {
+            if (!!res)
+            {
+                setTextAreaValue("idCompressedText", res);
+                fsm.gotoState("Ready");
+            }
+
+            if (!!err)
+            {
+                ra.error(err);
+                errorMessage = err;
+            }
+
+            fsm.gotoState("Ready");
+        },
+        function(progessFraction)
+        {
+            var percent = progessFraction * 100;
+            progressBar.setProgress(30);
+        }
+    );
+};
+
+//
+fsm.transition["Ready"]["Decompressing"] = function()
+{
+    setTextAreaValue("idPlainText", "");
+
+    ra.showElement(progressBar.element, true);
+
+    ra.enableElement(ra.el("idCompressButton"), false);
+    ra.enableElement(ra.el("idDecompressButton"), false);
+
+    ra.el("idPlainText").readOnly = true;
+    ra.el("idCompressedText").readOnly = true;
+
+    setInfoMessage("Decompressing ...");
+
+    lz64.decompress
+    (
+        ra.el("idCompressedText").value,
+        function(res, err)
+        {
+            if (!!res)
+            {
+                setTextAreaValue("idPlainText", res);
+            }
+
+            if (!!err)
+            {
+                ra.error(err);
+                errorMessage = err;
+            }
+
+            fsm.gotoState("Ready");
+        },
+        function(progessFraction)
+        {
+            var percent = progessFraction * 100;
+            progressBar.setProgress(30);
+        }
+    );
+};
+
+//
+fsm.transition["Compressing"]["Ready"] = function()
+{
+    ra.showElement(progressBar.element, false);
+
+    ra.enableElement(ra.el("idCompressButton"), true);
+    ra.enableElement(ra.el("idDecompressButton"), true);
+
+    ra.el("idPlainText").readOnly = false;
+    ra.el("idCompressedText").readOnly = false;
+
+    setReadyMessage();
+};
+
+//
+fsm.transition["Decompressing"]["Ready"] = function()
+{
+    ra.showElement(progressBar.element, false);
+
+    ra.enableElement(ra.el("idCompressButton"), true);
+    ra.enableElement(ra.el("idDecompressButton"), true);
+
+    ra.el("idPlainText").readOnly = false;
+    ra.el("idCompressedText").readOnly = false;
+
+    setReadyMessage();
+};
+
+////////////////////////////////////////
+//                                    //
+//              go()                  //
+//                                    //
+////////////////////////////////////////
 //
 context.go = function(dataString)
 {
     var compressedData = dataString.substring(4);
-    var decompressedResult = "";
-
-    ra.log("Current state == " + fsm.getCurrentState());
-    ra.log("Compressed data == " + compressedData);
-
-    buildUI();
-
-//    ra.log("input: " + compressedData);
-
-    ra.el("idCompressedText").value = compressedData;
 
     fsm.gotoState("Ready");
-    fsm.gotoState("Compressing");
 
-//    lz64.decompress
-//    (
-//        compressedData,
-//        function(res, err)
-//        {
-//            if (!!res)
-//            {
-//                ra.showElement(progressBar.element, false);
-//
-//                decompressedResult = res;
-//
-//                ra.log("Decompressed result: " + decompressedResult);
-//            }
-//
-//            if (!!err)
-//                ra.log("Error: " + err);
-//        },
-//        function(progessFraction)
-//        {
-//            var percent = progessFraction * 100;
-//            progressBar.setProgress(30);
-//        }
-//    );
+    if (compressedData.length > 0)
+    {
+        setTextAreaValue("idCompressedText", compressedData);
+        fsm.gotoState("Decompressing");
+    }
 };
 
 //

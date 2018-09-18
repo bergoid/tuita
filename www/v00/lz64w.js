@@ -11,6 +11,7 @@ action.compress   = 1;
 action.decompress = 2;
 action.progress   = 3;
 action.finish     = 4;
+//action.error      = 5;
 
 //
 var onFinish = function(wwself, cbn, res, err)
@@ -44,35 +45,49 @@ worker.onMessage = function(wwself, m)
         {
             case action.decompress:
 
-                lz64i.decompress
-                (
-                    m.data.data,
-                    function (res, err)
-                    {
-                        onFinish(wwself, m.data.cbn, res, err);
-                    },
-                    function (percent)
-                    {
-                        onProgress(wwself, m.data.cbn, percent);
-                    }
-                );
+                try
+                {
+                    lz64i.decompress
+                    (
+                        m.data.data,
+                        function (res, err)
+                        {
+                            onFinish(wwself, m.data.cbn, res, err);
+                        },
+                        function (percent)
+                        {
+                            onProgress(wwself, m.data.cbn, percent);
+                        }
+                    );
+                }
+                catch (errorMsg)
+                {
+                    onFinish(wwself, m.data.cbn, undefined, "Exception while decompressing: " + errorMsg );
+                }
 
                 break;
 
             case action.compress:
 
-                lz64i.compress
-                (
-                    m.data.data,
-                    function (res, err)
-                    {
-                        onFinish(wwself, m.data.cbn, res, err);
-                    },
-                    function (percent)
-                    {
-                        onProgress(wwself, m.data.cbn, percent);
-                    }
-                );
+                try
+                {
+                    lz64i.compress
+                    (
+                        m.data.data,
+                        function (res, err)
+                        {
+                            onFinish(wwself, m.data.cbn, res, err);
+                        },
+                        function (percent)
+                        {
+                            onProgress(wwself, m.data.cbn, percent);
+                        }
+                    );
+                }
+                catch (errorMsg)
+                {
+                    onFinish(wwself, m.data.cbn, undefined, "Exception while compressing: " + errorMsg );
+                }
 
                 break;
 

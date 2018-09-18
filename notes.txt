@@ -1,9 +1,9 @@
 
-. setting textarea to readonly doesn't work
+. message: use span
 
-. FSM:
-    . States:
-        . Ready
+. add link in upper right corner
+
+. FSM
         . Compressing
         . Decompressing
 
