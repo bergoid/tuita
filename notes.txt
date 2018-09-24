@@ -1,37 +1,3 @@
-
-. message: use span
-
-. add link in upper right corner
-
-. FSM
-        . Compressing
-        . Decompressing
-
-    . Transitions:
-        . null -> Ready
-        . Ready:
-            -> Compressing
-            -> Decompressing
-        . Compressing:
-            -> Ready
-        . Decompressing:
-            -> Ready
-
-. c01: diagnostic tool:
-    . 2 textarea panes side-by-side
-        . L : plaintext
-        . R : compressed
-    . above panes: 2 buttons side-by-side:
-        . L : "<-- decompress"
-        . R : "compress -->"
-
-    . below panes: message showing:
-        . size of plaintext in bytes + -h
-        . size of compressed text in bytes + -h
-        . compression factor
-
-    . bottom: room for a progress bar and a message (either "decompressing ..." or "compressing ...")
-
     . merge fsmlib into radi
 
     . layout:
@@ -102,6 +68,36 @@ v put on GH
     . OK for same URL with other arg(s)
     ; for other sub-URLs: requires a 404 page
 
+
+
+v FSM
+        v Compressing
+        v Decompressing
+
+    v Transitions:
+        v null -> Ready
+        v Ready:
+            -> Compressing
+            -> Decompressing
+        v Compressing:
+            -> Ready
+        v Decompressing:
+            -> Ready
+
+v c01: diagnostic tool:
+    v 2 textarea panes side-by-side
+        v L : plaintext
+        v R : compressed
+    v above panes: 2 buttons side-by-side:
+        v L : "<-- decompress"
+        v R : "compress -->"
+
+    v below panes: message showing:
+        v size of plaintext in bytes + -h
+        v size of compressed text in bytes + -h
+        x compression factor
+
+    v bottom: room for a progress bar and a message (either "decompressing ..." or "compressing ...")
 
 
 v create sample flexlayout

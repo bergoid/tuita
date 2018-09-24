@@ -7,12 +7,29 @@ var context = {};
 var progressBar = ra.createProgressBar("idProgressBar", "flexChild progressBar", "progressIndicator");
 
 var errorMessage = "";
+var versionString = "";
 
 ////////////////////////////////////////
 //                                    //
 //          Helper functions          //
 //                                    //
 ////////////////////////////////////////
+//
+var getLinkUrl = function(compressedText)
+{
+    var location = root.location;
+
+    var newLocation = location.protocol + "//" + location.host;
+
+    if (location.pathname)
+        newLocation += location.pathname;
+
+    if (compressedText.length > 0)
+        newLocation += "?d=" + versionString + compressedText;
+
+    return newLocation;
+};
+
 //
 var sizeFieldString = function(sizeInBytes)
 {
@@ -42,6 +59,28 @@ var setInfoMessage = function(message)
 };
 
 //
+var setLink = function()
+{
+    var el = ra.el("idLink");
+
+    if (!el)
+        return;
+
+    if (errorMessage.length > 0)
+    {
+        ra.removeClass(el, "visible");
+        ra.addClass(el, "invisible");
+        el.href = "";
+    }
+    else
+    {
+        ra.removeClass(el, "invisible");
+        ra.addClass(el, "visible");
+        el.href = getLinkUrl(ra.el("idCompressedText").value);
+    }
+};
+
+//
 var setReadyMessage = function()
 {
     var el = ra.el("idMessage");
@@ -54,18 +93,16 @@ var setReadyMessage = function()
         ra.removeClass(el, "invisible");
         ra.removeClass(el, "infoStyle");
         ra.addClass(el, "visible errorStyle");
-
         el.innerHTML = errorMessage;
         errorMessage = "";
+
     }
     else
     {
         ra.removeClass(el, "visible");
         ra.addClass(el, "invisible");
-
         el.innerHTML = "Placeholder";
     }
-
 };
 
 ////////////////////////////////////////
@@ -166,6 +203,16 @@ var bodyCss = function()
             {\
                 color: #ffffff;\
                 background-color: #c00000;\
+            }\
+            .linkStyle\
+            {\
+                color: #ffff00;\
+                text-decoration:none;\
+            }\
+            .linkStyle:hover\
+            {\
+                color: #606060;\
+                background-color: #ffff00;\
             }\
             .floatright\
             {\
@@ -359,6 +406,27 @@ var messageDOM = function()
 };
 
 //
+var linkDOM = function()
+{
+    var el = flexDOM("", "", "toolpanel");
+
+    ra.append
+    (
+        el,
+        "a",
+        {
+            id: "idLink",
+            className: "linkStyle invisible",
+//            href: root.document.documentURI,
+            href: root.location.href,
+            innerHTML: "Link"
+        }
+    );
+
+    return el;
+};
+
+//
 var progressDOM = function()
 {
     return ra.create
@@ -410,7 +478,8 @@ var buildUI = function()
                 [
                     "fitChild",
                     progressDOM(),
-                    messageDOM()
+                    messageDOM(),
+                    linkDOM()
                 ]
             }
         ]
@@ -467,7 +536,6 @@ fsm.transition["Ready"]["Compressing"] = function()
             if (!!res)
             {
                 setTextAreaValue("idCompressedText", res);
-                fsm.gotoState("Ready");
             }
 
             if (!!err)
@@ -538,6 +606,7 @@ fsm.transition["Compressing"]["Ready"] = function()
     ra.el("idPlainText").readOnly = false;
     ra.el("idCompressedText").readOnly = false;
 
+    setLink();
     setReadyMessage();
 };
 
@@ -552,6 +621,7 @@ fsm.transition["Decompressing"]["Ready"] = function()
     ra.el("idPlainText").readOnly = false;
     ra.el("idCompressedText").readOnly = false;
 
+    setLink();
     setReadyMessage();
 };
 
@@ -563,6 +633,7 @@ fsm.transition["Decompressing"]["Ready"] = function()
 //
 context.go = function(dataString)
 {
+    versionString = dataString.substring(0,4);
     var compressedData = dataString.substring(4);
 
     fsm.gotoState("Ready");

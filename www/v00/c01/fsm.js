@@ -34,17 +34,13 @@ fsm.create = function(id, states)
         var gotoState =  function(newState)
         {
             var retVal = transition[currentState][newState]();
-            
 
             if (retVal == false )
             {
-//                ra.log("FALSE");
                 fsm.outputEnabled && ra.warn("FSM '" + id + "': transition from '" + currentState + "' to '" + newState + "' not allowed.");
             }
             else
             {
-//                ra.log("TRUE");
-//                ra.log("op enabled == " + fsm.outputEnabled);
                 fsm.outputEnabled && ra.info("FSM '" + id + "': transition from '" + currentState + "' to '" + newState + "'.");
                 currentState = newState;
                 if (typeof retVal === 'function')
